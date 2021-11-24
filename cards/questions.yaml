@@ -1,60 +1,107 @@
 ---
+
 difficulty: 4
 lang: fr
 categories:
-  - Music
-    History
-duration: 15s
+  - Musique
+  - Histoire
+duration: 15
 question:
-  text: De quelle oeuvre provient cet extrait ?
-  sound:
-    name: skep_64k_5ms_10c.opus
-    copyright: Marcus Harvey, CC BY-SA 2.5
-    hide_copyright: yes
+  text: De quelle œuvre provient cet extrait ?
+  content:
+    - type: sound
+      name: skep_64k_5ms_10c.opus
+      copyright: Marcus Harvey, CC BY-SA 2.5
+      hide_copyright: yes
+      
 answer:
-  type: text
-  text: |
-    L’épitaphe de Seikilos ou chanson de Tralles.
-    C'est plus de 2000 ans après sa composition que nous pouvons écouter ce chant
-    aujourd'hui !
-    Datée du Ier ou IIe siècle, il s'agit de la composition musicale complète
-    la plus ancienne découverte à ce jour.
-    Plus d'informations, https://fr.wikipedia.org/wiki/%C3%89pitaphe_de_Seikilos
+  type: qcm
+  options:
+    - L'épitaphe de Seikilos
+    - Le thème d'Alexandre le Grand (Civilization V)
+    - L'hymne à la Muse
+    - L'hymne à Nikkal
+  answer: 1
+  content: 
+    - type: text
+      text: |
+        L’épitaphe de Seikilos ou chanson de Tralles.
+        C'est plus de 2000 ans après sa composition que nous pouvons écouter ce chant
+        aujourd'hui !
+        Datée du Ier ou IIe siècle, il s'agit de la composition musicale complète
+        la plus ancienne découverte à ce jour.
+  sources:
+    - "https://fr.wikipedia.org/wiki/%C3%89pitaphe_de_Seikilos"
 
 ---
+
 difficulty: 3
 lang: fr
 categories:
   - Science
-duration: 15s
+duration: 15
 question:
   text: Quelle est cette molécule ?
   picture:
     name: ch3ch2oh.svg
 answer:
-  type: text
-  text: |
-    Il s'agit de la molécule d'étahnol, soit l'alcool commun  que l'on
-    boit pour faire la fête 🍷
+  type: qcm
+  options:
+    - Méthane
+    - Éthanol
+    - Sucre
+    - Caféine
+  answer: 2
+  content:
+    - type: text
+      text: |
+        Il s'agit de la molécule d'étahnol, soit l'alcool commun  que l'on
+        boit pour faire la fête 🍷
 
 ---
+
 difficulty: 2
 lang: fr
 categories:
-  - Literature
-duration: 15s
+  - Littérature
+duration: 15
 question:
-  text: De quelle oeuvre ou auteur provient cet aphorisme ? « S'il n'y a pas de Dieu, tout est permis »
+  text: De quelle oœvre ou auteur provient cet aphorisme ?
+  content:
+    - type: quote
+      text: S'il n'y a pas de Dieu, tout est permis
 answer:
   type: text
-  text: Le personnage d'Ivan dans _Les Frères Karamazov_ de Dostoïevski.
+  answer: Les Frères Karamazov de Dostoïevski
+  text: Ces mots ont été prononcés par le personnage d'Ivan, dans _Les Frères Karamazov_ de Dostoïevski.
 
 ---
+
 difficulty: 1
 lang: fr
 categories:
-  - Technology
-duration: 15s
+  - Technologie
+duration: 15
+question:
   text: Quelle est la vitesse maximale qu'un TGV a pu atteindre ?
-answer: |
-  Le TGV a pu atteindre 574 km/h. Mais il a fallu préparer la rame ... ... ...
+answer:
+  type: qcm
+  options:
+    - 251,2 km/h
+    - 333,4 km/h
+    - 574,8 km/h
+    - 647,7 km/h
+  answer: 3
+  content:
+    - type: text
+      text: |
+        Le TGV a pu atteindre 574 km/h le 10 juin 2007, à l'occasion des 25 ans du
+        TGV. Mais il a fallu préparer la rame et la voie pour permettre ce record !
+        Le lieu, la toute nouvelle ligne à grande vitesse Paris-Strasbourg, n'a pas
+        été choisi au hasard, ses longues sections presque droites étant très favorables
+        à ce genre de records de vitesse. Les caténères ont dûes être particulièrement
+        tendues pour supporter le passage du train. Ce dernier était également unique en
+        son genre, grâce à de nouvelles voitures intermédiaires motorisées, ce qui n'existait
+        pas sur les autres TGV de l'époque.
+  sources:
+    - "https://fr.wikipedia.org/wiki/Records_du_monde_de_vitesse_sur_rail_en_France#Programme_de_2007_(V_150)"
