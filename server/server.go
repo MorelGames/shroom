@@ -101,8 +101,8 @@ func play(seed []byte, w http.ResponseWriter, r *http.Request) {
 			tItlv := delta - (delta % interval)
 			remainingMs := tItlv + interval - delta
 
+			t0 := time.Now()
 			rg := Rg(roomSeed, uint32(tItlv)) % 500
-
 			msg := struct {
 				Username string    `json:"username"`
 				Question int       `json:"question"`
@@ -119,7 +119,8 @@ func play(seed []byte, w http.ResponseWriter, r *http.Request) {
 				fmt.Println(err.Error())
 				return
 			}
-			time.Sleep(time.Duration(remainingMs) * time.Millisecond)
+
+			time.Sleep(time.Duration(remainingMs)*time.Millisecond - time.Since(t0))
 		}
 	}()
 
