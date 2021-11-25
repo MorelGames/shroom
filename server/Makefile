@@ -6,4 +6,4 @@ build: fmt
 fmt:
 	go fmt .
 run:
-	go run . 8080
+	go run . :8080
