@@ -105,3 +105,29 @@ answer:
         pas sur les autres TGV de l'époque.
   sources:
     - "https://fr.wikipedia.org/wiki/Records_du_monde_de_vitesse_sur_rail_en_France#Programme_de_2007_(V_150)"
+
+---
+
+difficulty: 3
+lang: fr
+categories:
+  - Science
+duration: 15
+question:
+  text: Quel est le sexe de ce chat ? (avec 99,9 % de probabilité)
+  picture:
+    name: calico_cat.webp
+answer:
+  type: qcm
+  options:
+    - Mâle ♂️
+    - Femelle ♀️
+  content:
+    - type: text
+      text: |
+        Il s'agit d'une femelle avec 99,9 % de probabilité.
+        Le gène responsable de la couleur orange ou de la couleur noire se situe sur un
+        chromosome X. Un chat vêtu à la fois d'orange et de noir doit porter les deux allèles
+        correspondants, nécessitant par conséquent d'avoir une paire XX, c'est-à-dire être une femelle.
+        Les mâles ayant une paire XY ne peuvent en effet pas porter les deux allèles à la fois,
+        sauf anomalie génétique rare.
