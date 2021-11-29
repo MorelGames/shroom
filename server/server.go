@@ -19,6 +19,7 @@ var interval = 15000                               // msecs
 type Champignon struct {
 	Server *http.Server
 	Seed   []byte
+	State  RoomManager
 }
 
 type SafeConn struct {
@@ -57,8 +58,9 @@ func main() {
 }
 
 func NewChampignon(seed string, server *http.Server) (*Champignon, error) {
+	state := NewRedisStateWithDefaults()
 	wrapPlay := func(w http.ResponseWriter, r *http.Request) {
-		play([]byte(seed), w, r)
+		play([]byte(seed), state, w, r)
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/play", wrapPlay)
@@ -66,13 +68,22 @@ func NewChampignon(seed string, server *http.Server) (*Champignon, error) {
 	champ := &Champignon{
 		server,
 		[]byte(seed),
+		state,
 	}
 	return champ, nil
 }
 
-func play(seed []byte, w http.ResponseWriter, r *http.Request) {
+func play(seed []byte, state RoomManager, w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	if len(q["room"]) == 0 || len(q["username"]) == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err := state.JoinRoom(q["room"][0])
+
+	if err != nil {
+		fmt.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -101,7 +112,6 @@ func play(seed []byte, w http.ResponseWriter, r *http.Request) {
 			tItlv := delta - (delta % interval)
 			remainingMs := tItlv + interval - delta
 
-			t0 := time.Now()
 			rg := Rg(roomSeed, uint32(tItlv)) % 500
 			msg := struct {
 				Username string    `json:"username"`
@@ -120,7 +130,7 @@ func play(seed []byte, w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			time.Sleep(time.Duration(remainingMs)*time.Millisecond - time.Since(t0))
+			time.Sleep(time.Duration(remainingMs)*time.Millisecond - time.Since(now))
 		}
 	}()
 
