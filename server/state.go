@@ -18,15 +18,12 @@ const (
 	RandSeed = 42
 )
 
-var (
-	Rand = rand.New(rand.NewSource(RandSeed))
-)
-
 func randomRoomName() string {
 	var roomId strings.Builder
+	r := rand.New(rand.NewSource(time.Now().Unix()))
 	max := len(Universe)
 	for k := 0; k < 5; k++ {
-		randIdx := Rand.Intn(max)
+		randIdx := r.Intn(max)
 		roomId.WriteByte(Universe[randIdx])
 	}
 	return roomId.String()
@@ -62,11 +59,13 @@ func NewRedisStateWithDefaults() *RedisState {
 type InternalState map[string]string
 type LocalState struct {
 	KVStore InternalState
+	KHStore map[string]InternalState
 }
 
 func NewLocalState() *LocalState {
 	return &LocalState{
 		KVStore: make(InternalState),
+		KHStore: make(map[string]InternalState),
 	}
 }
 
@@ -81,18 +80,28 @@ func (s *LocalState) JoinRoom(room string) error {
 
 func (s *LocalState) CreateRoom() (string, error) {
 	room := randomRoomName()
-	s.KVStore["room:"+room] = strconv.Itoa(int(time.Now().UTC().Unix()))
+	s.KVStore["room:"+room] = strconv.Itoa(int(time.Now().Unix()))
 	return room, nil
 }
 
 func (s *RedisState) JoinRoom(room string) error {
-	err := s.Rdb.Get(s.ctx, "room:"+room).Err()
+	val, _ := s.Rdb.HGetAll(s.ctx, "room:"+room).Result()
+	if len(val) == 0 {
+		return errors.New("No such room.")
+	}
+	fmt.Println(room, val)
+	err := s.Rdb.HIncrBy(s.ctx, "room:"+room, "players", 1).Err()
 	return err
 }
 
 func (s *RedisState) CreateRoom() (string, error) {
 	room := randomRoomName()
-	val := time.Now().UTC().Unix()
-	err := s.Rdb.Set(s.ctx, "room:"+room, val, 0).Err()
+	val := strconv.Itoa(int(time.Now().Unix()))
+	err := s.Rdb.HSet(s.ctx, "room:"+room, []string{
+		"created", val,
+		"players", "0",
+		"game", "",
+	},
+	).Err()
 	return room, err
 }
