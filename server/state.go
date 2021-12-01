@@ -80,7 +80,8 @@ func (s *LocalState) JoinRoom(room string) error {
 
 func (s *LocalState) CreateRoom() (string, error) {
 	room := randomRoomName()
-	s.KVStore["room:"+room] = strconv.Itoa(int(time.Now().Unix()))
+	val := strconv.FormatInt(time.Now().Unix(), 10)
+	s.KVStore["room:"+room] = val
 	return room, nil
 }
 
@@ -96,7 +97,7 @@ func (s *RedisState) JoinRoom(room string) error {
 
 func (s *RedisState) CreateRoom() (string, error) {
 	room := randomRoomName()
-	val := strconv.Itoa(int(time.Now().Unix()))
+	val := strconv.FormatInt(time.Now().Unix(), 10)
 	err := s.Rdb.HSet(s.ctx, "room:"+room, []string{
 		"created", val,
 		"players", "0",
