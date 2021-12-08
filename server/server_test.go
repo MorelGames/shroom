@@ -124,13 +124,29 @@ func TestRoomInfo(t *testing.T) {
 
 	// Player joins the room
 	state.JoinRoom(room, username)
-	//state.JoinRoom(room, username)
 	roomInfo, _ = state.RoomInfo(room) // Refetch infos
 
-	t.Log(roomInfo)
 	want = 1 // Now there is 1 player
 	got = roomInfo.Players
 	if got != want {
 		t.Errorf("players: got %v, want %v", got, want)
 	}
+
+	// Same username: error and no effect
+	err = state.JoinRoom(room, username)
+	if err == nil {
+		t.Error("Expected error: same username")
+		return
+	}
+
+	// Another username
+	state.JoinRoom(room, username+"other")
+	roomInfo, _ = state.RoomInfo(room)
+
+	want = 2
+	got = roomInfo.Players
+	if got != want {
+		t.Errorf("players: got %v, want %v", got, want)
+	}
+
 }
