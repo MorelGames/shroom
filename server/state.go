@@ -15,7 +15,6 @@ import (
 const (
 	// Digits are chosen such that we cannot easily confuse them (e.g.: 0 and O)
 	Universe = "23456789CFGHJMPQRVWX" // Pr(20, 5) = 3,200,000
-	RandSeed = 42
 )
 
 func randomRoomName() string {
@@ -29,9 +28,11 @@ func randomRoomName() string {
 	return roomId.String()
 }
 
-type RoomManager interface {
-	JoinRoom(room string) error
-	CreateRoom() (string, error)
+type RoomInfo struct {
+	Room    string
+	Created time.Time
+	Game    int
+	Players int
 }
 
 type RedisState struct {
@@ -85,14 +86,16 @@ func (s *LocalState) CreateRoom() (string, error) {
 	return room, nil
 }
 
-func (s *RedisState) JoinRoom(room string) error {
+func (s *RedisState) JoinRoom(room string, username string) error {
 	val, _ := s.Rdb.HGetAll(s.ctx, "room:"+room).Result()
 	if len(val) == 0 {
-		return errors.New("No such room.")
+		return errors.New("No such room: " + room)
 	}
-	fmt.Println(room, val)
-	err := s.Rdb.HIncrBy(s.ctx, "room:"+room, "players", 1).Err()
-	return err
+	added, _ := s.Rdb.SAdd(s.ctx, "room:"+room+":players", username).Result()
+	if added == 0 { // Redis added 0 user, i.e., this username is already here
+		return errors.New("Username taken: " + username)
+	}
+	return nil
 }
 
 func (s *RedisState) CreateRoom() (string, error) {
@@ -100,9 +103,32 @@ func (s *RedisState) CreateRoom() (string, error) {
 	val := strconv.FormatInt(time.Now().Unix(), 10)
 	err := s.Rdb.HSet(s.ctx, "room:"+room, []string{
 		"created", val,
-		"players", "0",
 		"game", "",
 	},
 	).Err()
 	return room, err
+}
+
+func (s *RedisState) RoomInfo(room string) (*RoomInfo, error) {
+	kv, _ := s.Rdb.HGetAll(s.ctx, "room:"+room).Result()
+	if len(kv) == 0 {
+		return &RoomInfo{}, errors.New("No such room: " + room)
+	}
+	players, err := s.Rdb.SCard(s.ctx, "room:"+room+":players").Result()
+	if err != nil {
+		return &RoomInfo{}, err
+	}
+	val, _ := kv["created"]
+	timestamp, err := strconv.ParseInt(val, 10, 64)
+	if err != nil {
+		return &RoomInfo{}, err
+	}
+	created := time.Unix(timestamp, 0)
+	roomInfo := &RoomInfo{
+		Room:    room,
+		Game:    0,
+		Players: int(players),
+		Created: created,
+	}
+	return roomInfo, nil
 }

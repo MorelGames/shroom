@@ -19,7 +19,7 @@ var interval = 15000                               // msecs
 type Champignon struct {
 	Server *http.Server
 	Seed   []byte
-	State  RoomManager
+	State  *RedisState
 }
 
 type SafeConn struct {
@@ -73,14 +73,14 @@ func NewChampignon(seed string, server *http.Server) (*Champignon, error) {
 	return champ, nil
 }
 
-func play(seed []byte, state RoomManager, w http.ResponseWriter, r *http.Request) {
+func play(seed []byte, state *RedisState, w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	if len(q["room"]) == 0 || len(q["username"]) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	err := state.JoinRoom(q["room"][0])
+	err := state.JoinRoom(q["room"][0], q["username"][0])
 
 	if err != nil {
 		fmt.Println(err)
