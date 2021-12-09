@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -116,9 +117,9 @@ func TestRoomInfo(t *testing.T) {
 	room, _ := state.CreateRoom()
 	roomInfo, _ := state.RoomInfo(room)
 
-	want := 0 // Room has been created, but there is no player yet
+	want := []string{} // Room has been created, but there is no player yet
 	got := roomInfo.Players
-	if got != want {
+	if !reflect.DeepEqual(want, got) {
 		t.Errorf("players: got %v, want %v", got, want)
 	}
 
@@ -126,9 +127,9 @@ func TestRoomInfo(t *testing.T) {
 	state.JoinRoom(room, username)
 	roomInfo, _ = state.RoomInfo(room) // Refetch infos
 
-	want = 1 // Now there is 1 player
+	want = []string{username} // Now there is 1 player
 	got = roomInfo.Players
-	if got != want {
+	if !reflect.DeepEqual(want, got) {
 		t.Errorf("players: got %v, want %v", got, want)
 	}
 
@@ -143,10 +144,38 @@ func TestRoomInfo(t *testing.T) {
 	state.JoinRoom(room, username+"other")
 	roomInfo, _ = state.RoomInfo(room)
 
-	want = 2
+	want1 := []string{"user42", "user42other"}
+	want2 := []string{"user42other", "user42"}
 	got = roomInfo.Players
-	if got != want {
+	if !reflect.DeepEqual(want1, got) && !reflect.DeepEqual(want2, got) {
 		t.Errorf("players: got %v, want %v", got, want)
 	}
+}
 
+func TestRoomInfoWithUTF8(t *testing.T) {
+	s, err := miniredis.Run()
+	if err != nil {
+		t.Errorf(err.Error())
+		return
+	}
+	defer s.Close()
+	state := NewRedisState(
+		context.Background(),
+		redis.NewClient(&redis.Options{
+			Addr:     s.Addr(),
+			Password: "",
+			DB:       0,
+		}),
+	)
+	username := "猫ちゃん🐱"
+	room, _ := state.CreateRoom()
+	state.JoinRoom(room, username)
+	roomInfo, _ := state.RoomInfo(room)
+
+	want := []string{username}
+	got := roomInfo.Players
+	if !reflect.DeepEqual(want, got) {
+		t.Errorf("players: got %v, want %v", got, want)
+	}
+	t.Log(roomInfo.Players)
 }

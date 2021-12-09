@@ -32,7 +32,7 @@ type RoomInfo struct {
 	Room    string
 	Created time.Time
 	Game    int
-	Players int
+	Players []string
 }
 
 type RedisState struct {
@@ -114,7 +114,7 @@ func (s *RedisState) RoomInfo(room string) (*RoomInfo, error) {
 	if len(kv) == 0 {
 		return &RoomInfo{}, errors.New("No such room: " + room)
 	}
-	players, err := s.Rdb.SCard(s.ctx, "room:"+room+":players").Result()
+	players, err := s.Rdb.SMembers(s.ctx, "room:"+room+":players").Result()
 	if err != nil {
 		return &RoomInfo{}, err
 	}
@@ -127,7 +127,7 @@ func (s *RedisState) RoomInfo(room string) (*RoomInfo, error) {
 	roomInfo := &RoomInfo{
 		Room:    room,
 		Game:    0,
-		Players: int(players),
+		Players: players,
 		Created: created,
 	}
 	return roomInfo, nil
