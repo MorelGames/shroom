@@ -179,3 +179,36 @@ func TestRoomInfoWithUTF8(t *testing.T) {
 	}
 	t.Log(roomInfo.Players)
 }
+
+func TestNewGame(t *testing.T) {
+	s, err := miniredis.Run()
+	if err != nil {
+		t.Errorf(err.Error())
+		return
+	}
+	defer s.Close()
+	state := NewRedisState(
+		context.Background(),
+		redis.NewClient(&redis.Options{
+			Addr:     s.Addr(),
+			Password: "",
+			DB:       0,
+		}),
+	)
+	username := "user42"
+	room, _ := state.CreateRoom()
+	err = state.NewGame(room)
+	if err == nil {
+		t.Error("Expected error because there is no player yet.")
+		return
+	}
+	state.JoinRoom(room, username)
+	err = state.NewGame(room)
+	if err != nil {
+		t.Error("Error not expected here.")
+	}
+	info, _ := state.RoomInfo(room)
+	if info.Game == 0 {
+		t.Error("room.Game should be set now.")
+	}
+}

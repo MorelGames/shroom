@@ -104,8 +104,7 @@ func (s *RedisState) CreateRoom() (string, error) {
 	err := s.Rdb.HSet(s.ctx, "room:"+room, []string{
 		"created", val,
 		"game", "",
-	},
-	).Err()
+	}).Err()
 	return room, err
 }
 
@@ -124,11 +123,34 @@ func (s *RedisState) RoomInfo(room string) (*RoomInfo, error) {
 		return &RoomInfo{}, err
 	}
 	created := time.Unix(timestamp, 0)
+	val, _ = kv["game"]
+	if err != nil {
+		return &RoomInfo{}, err
+	}
+	game, _ := strconv.Atoi(val)
 	roomInfo := &RoomInfo{
 		Room:    room,
-		Game:    0,
+		Game:    game,
 		Players: players,
 		Created: created,
 	}
 	return roomInfo, nil
+}
+
+func (s *RedisState) NewGame(room string) error {
+	info, err := s.RoomInfo(room)
+	if err != nil {
+		return err
+	}
+	if len(info.Players) == 0 {
+		return errors.New("Cannot run a new game without any player.")
+	}
+	game := strconv.Itoa(int(time.Now().Unix()))
+	err = s.Rdb.HSet(s.ctx, "room:"+room, []string{
+		"game", game,
+	}).Err()
+	if err != nil {
+		return err
+	}
+	return nil
 }
