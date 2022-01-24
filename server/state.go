@@ -29,10 +29,16 @@ func randomRoomName() string {
 }
 
 type RoomInfo struct {
-	Room    string
+	Room    string // Room name
 	Created time.Time
-	Game    int
-	Players []string
+	Game    int      // Associated Game ID (if any)
+	Players []string // List of players
+}
+
+type GameParams struct {
+	FullName  string // Format: <room>/<game>
+	Rounds    int    // No of rounds
+	Questions []int  // List of question IDs
 }
 
 type RedisState struct {
